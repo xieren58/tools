@@ -1,7 +1,6 @@
 use clap::{AppSettings, Arg, ArgMatches, Command};
 use sha2::Digest;
-use std::fmt;
-use std::fmt::{Debug, Formatter};
+use std::fmt::{Debug, Display, Formatter};
 use std::string::String;
 
 fn build_app() -> Command<'static> {
@@ -78,20 +77,20 @@ pub enum HexError<'a> {
 
 impl<'a> std::error::Error for HexError<'a> {}
 
-impl<'a> fmt::Display for HexError<'a> {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+impl<'a> Display for HexError<'a> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match *self {
             HexError::InvalidHexPrefix { hex } => {
                 write!(
                     f,
-                    "Invalid hex prefix '{}', should start with 0x or 0X",
+                    "Invalid hex string '{}', should start with '0x' or '0X'",
                     hex
                 )
             }
             HexError::InvalidLength { hex } => {
                 write!(
                     f,
-                    "Invalid string length '{}', should be 4, e.g. '0x12'",
+                    "Invalid string length '{}', should be 4 ASCII letters, e.g. '0x12'",
                     hex
                 )
             }
@@ -393,8 +392,7 @@ pub fn compute(matches: &ArgMatches, inputs: &[HashInput]) {
 fn main() {
     let app = build_app();
     let matches = app.get_matches();
-
     let inputs = get_inputs(&matches);
-
     compute(&matches, &inputs);
+    std::process::exit(exitcode::OK);
 }
